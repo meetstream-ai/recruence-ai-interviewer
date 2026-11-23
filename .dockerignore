@@ -1,0 +1,16 @@
+# Never bake secrets or local data into the image; configuration comes from the environment at run time.
+.env
+.env.*
+!.env.example
+data/
+.venv/
+**/__pycache__/
+**/*.pyc
+.pytest_cache/
+.git/
+.claude/
+tests/
+docs/
+replica/
+rea/
+replica-skill-src/

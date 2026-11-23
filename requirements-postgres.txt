@@ -1,0 +1,2 @@
+# Only for DATABASE_URL=postgresql://...: pip install -r requirements-postgres.txt (the Docker image includes it).
+psycopg[binary]>=3.2,<4

@@ -1,0 +1,31 @@
+/* A plain company look, deliberately unlike Recruence's dashboard. */
+:root { --ink: #1d2230; --muted: #5d6474; --line: #e3e6ee; --brand: #6a3df0; --bg: #fbfbfd; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.6 "Segoe UI", system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+.demo-banner { background: #fff3c4; color: #5a4300; text-align: center; font-size: 14px; padding: 6px 12px; border-bottom: 1px solid #f0dd8a; }
+.top { display: flex; justify-content: space-between; align-items: center; max-width: 960px; margin: 0 auto; padding: 18px 20px; }
+.logo { font-weight: 700; font-size: 20px; color: var(--brand); text-decoration: none; }
+nav a { margin-left: 18px; color: var(--ink); text-decoration: none; }
+nav a[aria-current] { color: var(--brand); font-weight: 600; }
+main { max-width: 960px; margin: 0 auto; padding: 10px 20px 40px; }
+.hero { padding-top: 60px; }
+.hero h1 { font-size: 44px; margin: 0 0 6px; }
+.lead { font-size: 20px; color: var(--muted); margin-top: 0; }
+.button, button { display: inline-block; background: var(--brand); color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; font: inherit; text-decoration: none; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+.muted { color: var(--muted); }
+.jobs { display: grid; gap: 14px; }
+.job-card { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; color: inherit; text-decoration: none; }
+.job-card:hover { border-color: var(--brand); }
+.job-card h3 { margin: 0 0 4px; }
+.tag { display: inline-block; font-size: 13px; padding: 2px 10px; border-radius: 99px; }
+.tag.open { background: #e6f7ec; color: #186a35; } .tag.closed { background: #fdecec; color: #8a1f1f; }
+.pre { white-space: pre-wrap; }
+.back { display: inline-block; margin: 10px 0; color: var(--brand); text-decoration: none; }
+form.apply { display: grid; gap: 12px; max-width: 620px; }
+form.apply label { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
+form.apply input, form.apply textarea { font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+form.apply .check { display: flex; gap: 10px; font-weight: 400; align-items: flex-start; }
+.problem { color: #8a1f1f; background: #fdecec; padding: 8px 12px; border-radius: 8px; }
+.done { background: #e6f7ec; padding: 14px 18px; border-radius: 12px; }
+footer { max-width: 960px; margin: 0 auto; padding: 20px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }

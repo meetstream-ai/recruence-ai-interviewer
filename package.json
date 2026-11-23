@@ -1,0 +1,93 @@
+{
+  "name": "mia-interviewer-desktop",
+  "productName": "Recruence",
+  "version": "0.13.7",
+  "private": true,
+  "description": "Recruence desktop: the self-hosted AI interviewing app for Windows, macOS and Linux.",
+  "author": "Recruence contributors",
+  "license": "MIT",
+  "main": "desktop/main.js",
+  "scripts": {
+    "dev:electron": "electron .",
+    "build:backend": "node desktop/scripts/build-backend.js",
+    "build:electron": "npm run build:backend && electron-builder --win dir",
+    "package:win": "npm run build:backend && electron-builder --win nsis",
+    "test:smoke": "node desktop/scripts/smoke.js",
+    "test:db": "node desktop/scripts/run-python.js scripts/test_db.py",
+    "demo:site": "node examples/demo-company-site/serve.js",
+    "package:mac": "npm run build:backend && electron-builder --mac dmg",
+    "package:linux": "npm run build:backend && electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "ai.mia.interviewer",
+    "productName": "Recruence",
+    "copyright": "Copyright © 2026 Recruence contributors",
+    "directories": {
+      "output": "desktop/dist",
+      "buildResources": "desktop"
+    },
+    "files": [
+      "package.json",
+      "desktop/main.js",
+      "desktop/dashboard.js",
+      "desktop/preload.js",
+      "desktop/loading.html",
+      "desktop/error.html",
+      "desktop/error.js",
+      "desktop/welcome.html",
+      "desktop/welcome.js",
+      "desktop/icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "desktop/build/backend/mia-backend",
+        "to": "backend/mia-backend"
+      }
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "desktop/icon.png",
+      "artifactName": "Recruence-Setup-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Recruence",
+      "uninstallDisplayName": "Recruence",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "include": "desktop/installer.nsh"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "desktop/icon.png",
+      "category": "public.app-category.business",
+      "artifactName": "Recruence-${version}-macOS-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "Recruence ${version}"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "desktop/icon.png",
+      "category": "Office",
+      "executableName": "recruence",
+      "synopsis": "Self-hosted AI interviewing",
+      "artifactName": "Recruence-${version}-Linux-${arch}.${ext}"
+    }
+  }
+}

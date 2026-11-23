@@ -1,0 +1,30 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+
+# Developer tools installed alongside the project; not part of the app
+rea/
+replica-skill-src/
+
+# Encryption key for settings saved from the dashboard (when DATA_DIR is outside data/)
+settings.key
+
+# Local working notes and tool configuration: not part of the public project
+docs/HANDOFF.md
+replica/
+.claude/
+# Runtime state written to DATA_DIR (when it is outside data/)
+setup.json
+database.json
+
+# Desktop app (docs/ELECTRON.md): dependencies, build output and download caches
+node_modules/
+desktop/build/
+desktop/dist/
+desktop/*.log
+.cache/
+# Local test settings (Neon / Supabase test connection strings): never committed
+.env.test.local

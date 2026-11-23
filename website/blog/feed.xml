@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+  <title>Recruence Blog</title><link>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/</link>
+  <description>Field notes on AI interviews from the team building Recruence.</description><language>en</language>
+  <item><title>How to Automate Interviews With AI Using Recruence</title><link>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/ai-interviewer/</link><guid>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/ai-interviewer/</guid>
+    <pubDate>Tue, 10 Nov 2026 00:00:00 +0000</pubDate>
+    <description>Build an AI interviewer that joins Meet, Teams or Zoom, asks every candidate the same approved questions, enforces the rules in code, and lets a person decide.</description><category>Build Guide</category><category>Structured Interviews</category><category>Voice Agents</category><category>Hiring</category></item>
+  <item><title>Evidence-Based Interview Scorecard: Scoring With Quotes</title><link>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/evidence-based-interview-scorecard/</link><guid>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/evidence-based-interview-scorecard/</guid>
+    <pubDate>Fri, 06 Nov 2026 00:00:00 +0000</pubDate>
+    <description>See how an evidence-based interview scorecard ties every rating to a verbatim quote, and the code checks that stop an AI from scoring words never said.</description><category>Evaluation</category><category>Scorecards</category><category>Structured Interviews</category><category>LLM</category></item>
+  <item><title>How to Run an AI Interview in Google Meet, Zoom or Teams</title><link>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/ai-interview-google-meet-zoom-teams/</link><guid>https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/ai-interview-google-meet-zoom-teams/</guid>
+    <pubDate>Tue, 03 Nov 2026 00:00:00 +0000</pubDate>
+    <description>Learn how to run an AI interview in Google Meet, Zoom or Teams with a meeting bot: setup, public address, voice providers and fixes for what goes wrong.</description><category>Dev Guide</category><category>Google Meet</category><category>Zoom</category><category>Microsoft Teams</category><category>MeetStream</category></item>
+</channel></rss>

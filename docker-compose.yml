@@ -1,0 +1,51 @@
+# Self-hosting with Docker Compose:
+#   docker compose up -d --build
+#   docker compose logs app | grep "setup code"     # the one-time code for the first-run setup
+#   open http://localhost:8000 and follow the setup (access, database, AI provider, MeetStream, email)
+#
+# A .env file is optional: values set there (see .env.example) are picked up and prefill or skip setup steps.
+# MeetStream must reach this app over public HTTPS (PUBLIC_BASE_URL). Put a reverse proxy or a tunnel in front of
+# port 8000 and expose only the webhook and candidate paths (docs/DEPLOYMENT.md).
+services:
+  app:
+    build: .
+    image: recruence:latest
+    env_file:
+      - path: .env
+        required: false  # Compose 2.24+; everything can also be set in the first-run setup
+    environment:
+      DATA_DIR: /data
+    ports:
+      # Bound to localhost: the dashboard isn't meant to be exposed directly. Change to "8000:8000" only
+      # behind your own authenticated proxy.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - mia-data:/data
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false  # only with --profile postgres
+
+  # Optional PostgreSQL instead of the SQLite file in mia-data:
+  #   set POSTGRES_PASSWORD and DATABASE_URL=postgresql://mia:<that password>@postgres:5432/mia in .env, then
+  #   docker compose --profile postgres up -d --build
+  postgres:
+    image: postgres:17
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: mia
+      POSTGRES_DB: mia
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+    volumes:
+      - mia-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mia -d mia"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  mia-data:
+  mia-postgres:

@@ -1,0 +1,135 @@
+name: Release
+
+# Builds the desktop app on each operating system's own runner and checks that each build starts. A tag like
+# v0.11.2 publishes the installers as a GitHub release: a draft is made first, each job uploads its own installer to it,
+# and it's published once all four are in. Release files don't use the account's Actions artifact storage (installers
+# are ~160 MB each, and a private repository's quota fills quickly). Run it by hand (Actions → Release → Run workflow)
+# to build and check all four without publishing anything.
+#
+# The backend is frozen with PyInstaller, which produces a program for the machine that builds it: so one job per
+# system and, on macOS, one per chip (an Apple Silicon backend can't run on an Intel Mac).
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft:
+    name: Draft the release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Create the draft (or reuse it when a run is retried)
+        run: |
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --generate-notes --title "Recruence ${GITHUB_REF_NAME#v}"
+
+  build:
+    name: ${{ matrix.label }}
+    needs: draft
+    # Tags wait for the draft; manual runs (no draft) go ahead.
+    if: ${{ !cancelled() && (needs.draft.result == 'success' || needs.draft.result == 'skipped') }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows
+            package: npm run package:win --
+          - os: macos-latest
+            label: macOS Apple Silicon
+            package: npm run package:mac -- --arm64
+          - os: macos-15-intel
+            label: macOS Intel
+            package: npm run package:mac -- --x64
+          - os: ubuntu-latest
+            label: Linux
+            package: npm run package:linux --
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Python environment (.venv, as in docs/ELECTRON.md)
+        shell: bash
+        run: |
+          python -m venv .venv
+          if [ -f .venv/Scripts/pip.exe ]; then PIP=.venv/Scripts/pip; else PIP=.venv/bin/pip; fi
+          $PIP install -r requirements.txt -r requirements-postgres.txt -r requirements-desktop.txt
+
+      - name: Electron tooling
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do npm ci && break; echo "npm ci failed (attempt $attempt), retrying"; sleep 15; done
+
+      - name: Freeze the backend and package the app
+        shell: bash
+        env:
+          # Unsigned builds: no certificates are configured. Signing can be added later with CSC_LINK and
+          # CSC_KEY_PASSWORD (and Apple notarization) secrets.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: ${{ matrix.package }} --publish never
+
+      - name: Launch check (built app)
+        shell: bash
+        env:
+          MIA_USERDATA: ${{ runner.temp }}/recruence-smoke
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            # Ubuntu 24.04 blocks the unprivileged user namespaces Chromium's sandbox needs; allow them on this
+            # throwaway runner rather than turning the app's sandbox off.
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+            sudo apt-get install -y xvfb >/dev/null
+            xvfb-run -a npm run test:smoke -- --unpacked
+          else
+            npm run test:smoke -- --unpacked
+          fi
+
+      - name: Only this job's installer
+        # The two macOS jobs make files with different names (arm64, x64); check each made exactly one.
+        shell: bash
+        run: |
+          ls -la desktop/dist
+          shopt -s nullglob  # a pattern that matches nothing is empty (GitHub's bash runs with -e and pipefail)
+          found=()
+          for f in desktop/dist/*.exe desktop/dist/*.dmg desktop/dist/*.AppImage; do
+            case "$f" in *__uninstaller*) ;; *) found+=("$f") ;; esac
+          done
+          echo "Installers: ${found[*]}"
+          [ "${#found[@]}" -eq 1 ] || { echo "Expected one installer, found ${#found[@]}"; exit 1; }
+          echo "INSTALLER=${found[0]}" >> "$GITHUB_ENV"
+
+      - name: Attach the installer to the draft release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" "$INSTALLER" --repo "$GITHUB_REPOSITORY" --clobber
+
+  publish:
+    name: Publish the release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Publish once every installer is attached
+        run: |
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest

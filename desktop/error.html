@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; script-src 'self'">
+  <title>Recruence</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { display: grid; place-items: center; font: 15px/1.5 "Segoe UI", system-ui, sans-serif; color: #12243d; background: #eaf4ff; }
+    .card { width: min(640px, 90vw); display: grid; gap: 14px; padding: 32px; border-radius: 24px; background: rgba(255, 255, 255, .7);
+      border: 1px solid rgba(255, 255, 255, .9); box-shadow: 0 20px 60px rgba(30, 80, 160, .12); }
+    h1 { margin: 0; font-size: 20px; }
+    p { margin: 0; color: #4b6280; }
+    pre { margin: 0; max-height: 220px; overflow: auto; padding: 12px; border-radius: 12px; background: #0f1e33; color: #d8e6ff; font-size: 12px; white-space: pre-wrap; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    button { font: inherit; padding: 8px 16px; border-radius: 999px; border: 1px solid #c6d9f2; background: #fff; cursor: pointer; }
+    button.primary { background: #2f7cf6; border-color: #2f7cf6; color: #fff; }
+    .titlebar { position: fixed; inset: 0 0 auto 0; height: 44px; display: flex; align-items: center; gap: 8px; padding-left: 12px;
+      background: #f6faff; border-bottom: 1px solid rgba(52, 127, 234, .15); font-size: 12px; color: #4b6280;
+      -webkit-app-region: drag; user-select: none; }
+    .titlebar img { width: 16px; height: 16px; }
+    .connect { display: grid; gap: 8px; padding-top: 6px; border-top: 1px solid #d6e5f7; }
+    .connect input { font: inherit; padding: 8px 12px; border-radius: 12px; border: 1px solid #c6d9f2; min-width: 0; flex: 1 1 260px; }
+    .connect .note { font-size: 13px; }
+    .bad { color: #b42318; }
+  </style>
+</head>
+<body>
+  <div class="titlebar"><img src="icon.png" alt=""><span>Recruence</span></div>
+  <div class="card" role="alert">
+    <h1 id="message">Recruence couldn't start</h1>
+    <p>The last lines from the backend are below. The full log is in <span id="logs"></span>.</p>
+    <pre id="log"></pre>
+    <div class="row">
+      <button class="primary" id="retry" type="button">Try again</button>
+      <button id="open-logs" type="button">Open the log folder</button>
+      <button id="quit" type="button">Quit</button>
+    </div>
+    <form class="connect" id="connect">
+      <strong>Connect to</strong>
+      <p class="note" id="connect-note">A Recruence server in the cloud (its https:// address), or leave it empty to run Recruence on this computer.</p>
+      <div class="row">
+        <input id="server" type="url" placeholder="https://recruence.example.com" aria-label="Recruence server address">
+        <button id="connect-go" type="submit">Connect</button>
+      </div>
+      <p class="note" id="connect-result" aria-live="polite"></p>
+    </form>
+  </div>
+  <script src="error.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; script-src 'self'">
+  <title>Recruence</title>
+  <style>
+    html, body { min-height: 100%; margin: 0; }
+    body { font: 15px/1.5 "Segoe UI", system-ui, sans-serif; color: #12243d;
+      background: radial-gradient(1200px 600px at 20% 10%, #d6e9ff 0%, transparent 60%), radial-gradient(900px 500px at 90% 90%, #e3f0ff 0%, transparent 60%), #eaf4ff; }
+    .titlebar { position: fixed; inset: 0 0 auto 0; height: 44px; display: flex; align-items: center; gap: 8px; padding-left: 12px; z-index: 2;
+      background: #f6faff; border-bottom: 1px solid rgba(52, 127, 234, .15); font-size: 12px; color: #4b6280; -webkit-app-region: drag; user-select: none; }
+    .titlebar img { width: 16px; height: 16px; }
+    main { max-width: 980px; margin: 0 auto; padding: 76px 24px 40px; display: grid; gap: 22px; }
+    header { display: grid; justify-items: center; text-align: center; gap: 6px; }
+    header img { width: 72px; height: 72px; }
+    h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
+    .lede { margin: 0; color: #4b6280; max-width: 620px; }
+    .choices { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; align-items: start; }
+    .choice { display: grid; gap: 12px; padding: 24px; border-radius: 22px; background: rgba(255, 255, 255, .7);
+      border: 1px solid rgba(255, 255, 255, .9); box-shadow: 0 18px 50px rgba(30, 80, 160, .10); }
+    .choice.recommended { border: 2px solid #2f7cf6; box-shadow: 0 18px 50px rgba(47, 124, 246, .18); }
+    .choice h2 { margin: 0; font-size: 19px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .badge { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: #2f7cf6; color: #fff; }
+    .choice p { margin: 0; color: #4b6280; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; background: #e7f0ff; color: #1f4f9a; }
+    ul.points { margin: 0; padding-left: 18px; color: #33475f; font-size: 14px; }
+    ul.points li { margin: 3px 0; }
+    form { display: grid; gap: 8px; }
+    label { font-weight: 600; font-size: 14px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    input { font: inherit; flex: 1 1 260px; min-width: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid #c6d9f2; background: #fff; }
+    input:focus { outline: 2px solid #2f7cf6; outline-offset: 1px; }
+    button { font: inherit; padding: 10px 18px; border-radius: 999px; border: 1px solid #c6d9f2; background: #fff; cursor: pointer; }
+    button.primary { background: #2f7cf6; border-color: #2f7cf6; color: #fff; font-weight: 600; }
+    button[disabled] { opacity: .6; cursor: progress; }
+    .result { font-size: 14px; min-height: 1.5em; }
+    .bad { color: #b42318; }
+    details { border-top: 1px solid #d6e5f7; padding-top: 10px; }
+    summary { cursor: pointer; font-weight: 600; font-size: 14px; color: #1f4f9a; }
+    details ol { margin: 8px 0 0; padding-left: 20px; font-size: 14px; color: #33475f; }
+    details li { margin: 5px 0; }
+    code { font: 12.5px Consolas, monospace; background: #eef4fc; padding: 1px 5px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e1ebf7; vertical-align: top; }
+    th { color: #4b6280; font-weight: 600; }
+    .note { font-size: 13px; color: #4b6280; }
+    @media (max-width: 820px) { .choices { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="titlebar"><img src="icon.png" alt=""><span>Recruence</span></div>
+  <main>
+    <header>
+      <img src="icon.png" alt="">
+      <h1>How do you want to run Recruence?</h1>
+      <p class="lede">Recruence has two parts: this app, where you manage jobs, candidates and interviews, and a backend that takes applications, runs the interviews and writes the reports. Choose where the backend runs. You can change this later in Settings → System.</p>
+    </header>
+
+    <div class="choices">
+      <section class="choice recommended" aria-labelledby="cloud-title">
+        <h2 id="cloud-title">Bring your own cloud <span class="badge">Recommended</span></h2>
+        <p>Run the backend on your own cloud server, with your own database. Recruence keeps working around the clock: candidates apply, take their interviews and get evaluated even when this computer is off.</p>
+        <div class="chips" aria-label="Works with">
+          <span class="chip">AWS</span><span class="chip">Google Cloud</span><span class="chip">Azure</span>
+          <span class="chip">DigitalOcean</span><span class="chip">Hetzner</span><span class="chip">Railway</span>
+        </div>
+        <ul class="points">
+          <li>Your server, your database (PostgreSQL, such as Neon): your candidates' data stays in your accounts.</li>
+          <li>One permanent https:// address for candidate links, MeetStream and your careers website.</li>
+          <li>Everyone on your team signs in from their own copy of this app.</li>
+        </ul>
+        <form id="cloud">
+          <label for="server">Your Recruence server's address</label>
+          <div class="row">
+            <input id="server" type="url" placeholder="https://recruence.yourcompany.com" autocomplete="url" required>
+            <button class="primary" id="connect" type="submit">Connect</button>
+          </div>
+          <p class="result" id="result" aria-live="polite"></p>
+        </form>
+        <details>
+          <summary>Don't have a server yet? How to set one up</summary>
+          <ol>
+            <li><strong>A database:</strong> create a PostgreSQL database (Neon, Supabase, Amazon RDS, Cloud SQL, Azure Database for PostgreSQL…) and copy its connection string.</li>
+            <li><strong>A server:</strong> run the Recruence server image (the project's <code>Dockerfile</code>) on your cloud, as <strong>one</strong> copy that's always on, with <code>REMOTE_DASHBOARD=true</code>, <code>DATABASE_URL</code>, <code>SETTINGS_ENCRYPTION_KEY</code> and <code>PUBLIC_BASE_URL</code> (the guide <code>docs/CLOUD.md</code> and <code>deploy/cloud/</code> have everything).</li>
+            <li><strong>HTTPS:</strong> give it a permanent https:// address on your domain: the platform's own, Caddy, or a Cloudflare Tunnel.</li>
+            <li><strong>Connect:</strong> paste that address above. The first account of a new database is created on the server itself; after that, everyone signs in here.</li>
+          </ol>
+          <table>
+            <thead><tr><th>Provider</th><th>Simplest way</th></tr></thead>
+            <tbody>
+              <tr><td>AWS</td><td>Lightsail or EC2 with Docker (<code>deploy/cloud</code> compose), or App Runner with one instance</td></tr>
+              <tr><td>Google Cloud</td><td>Compute Engine with Docker, or Cloud Run with minimum and maximum instances 1, CPU always allocated</td></tr>
+              <tr><td>Azure</td><td>A Linux VM with Docker, or Container Apps with 1 replica (no scale to zero)</td></tr>
+              <tr><td>DigitalOcean</td><td>A Droplet with Docker, or App Platform with 1 container</td></tr>
+              <tr><td>Hetzner</td><td>A Cloud server with Docker and the Caddy profile</td></tr>
+              <tr><td>Railway</td><td>Deploy from the repository's Dockerfile, 1 replica, with a Postgres plugin or Neon</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </section>
+
+      <section class="choice" aria-labelledby="local-title">
+        <h2 id="local-title">Run on this computer</h2>
+        <p>The backend runs inside this app. Good for trying Recruence, or one recruiter.</p>
+        <ul class="points">
+          <li>Nothing to set up: start now.</li>
+          <li>Interviews and applications only work while this computer is on and Recruence is open.</li>
+          <li>Candidates and MeetStream reach it through a tunnel to this computer.</li>
+        </ul>
+        <div class="row"><button id="local" type="button">Use this computer</button></div>
+        <p class="note">You can move to your own cloud later: your data comes with you when it's in a hosted database.</p>
+      </section>
+    </div>
+  </main>
+  <script src="welcome.js"></script>
+</body>
+</html>
