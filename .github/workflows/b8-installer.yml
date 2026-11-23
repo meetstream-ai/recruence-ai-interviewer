@@ -1,0 +1,62 @@
+# Release validation B-8: install, upgrade and uninstall on a clean Windows machine (a fresh GitHub-hosted runner is one).
+# Run by hand only (Actions → B-8 installer test → Run workflow): it builds an installer and uses about 20–30 Windows
+# minutes. It installs the published release (the version users have), upgrades to the installer built from this
+# commit, then uninstalls, with scripts/windows_vm_test.ps1 -Unattended. Nothing external is called: the app runs
+# without an AI model or MeetStream key, with a throwaway local account.
+name: B-8 installer test
+
+on:
+  workflow_dispatch:
+    inputs:
+      old_release:
+        description: "Release tag to upgrade from (its Recruence-Setup-*.exe is installed first)"
+        default: "v0.11.2"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  install-upgrade-uninstall:
+    name: Install, upgrade, uninstall
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Python environment (.venv, as in docs/ELECTRON.md)
+        run: |
+          python -m venv .venv
+          .venv\Scripts\pip install -r requirements.txt -r requirements-postgres.txt -r requirements-desktop.txt
+      - run: npm ci
+      - name: Build the new installer
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm run package:win -- --publish never
+      - name: Download the old installer (the published release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "${{ inputs.old_release }}" --pattern "Recruence-Setup-*.exe" --dir "${{ runner.temp }}\old"
+      - name: Install, upgrade and uninstall (unattended)
+        shell: powershell
+        run: |
+          $old = Get-ChildItem "${{ runner.temp }}\old\Recruence-Setup-*.exe" | Select-Object -First 1
+          $new = Get-ChildItem "desktop\dist\Recruence-Setup-*.exe" | Sort-Object LastWriteTime | Select-Object -Last 1
+          Write-Host "Old: $($old.Name)  New: $($new.Name)"
+          powershell -ExecutionPolicy Bypass -File scripts\windows_vm_test.ps1 -OldInstaller $old.FullName -NewInstaller $new.FullName -Unattended
+          exit $LASTEXITCODE
+      # Printed here rather than uploaded: the repository's Actions artifact storage is small (and was full on the first run).
+      - name: Results and the app's logs
+        if: always()
+        shell: powershell
+        run: |
+          if (Test-Path scripts\windows_vm_test_result.txt) { Get-Content scripts\windows_vm_test_result.txt }
+          Get-ChildItem "$env:APPDATA\Recruence\logs" -File -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "`n----- $($_.Name) (last 40 lines) -----"; Get-Content $_.FullName -Tail 40 }

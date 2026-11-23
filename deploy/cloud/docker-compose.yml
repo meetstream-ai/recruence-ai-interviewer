@@ -1,0 +1,52 @@
+# Recruence's cloud backend (docs/CLOUD.md): the same image as the self-hosted one, run as the backend the desktop app
+# connects to, so candidates can apply and take interviews while recruiters' computers are off.
+#
+#   cp deploy/cloud/.env.example deploy/cloud/.env      # then fill it in (never commit it)
+#   docker compose -f deploy/cloud/docker-compose.yml up -d --build                       # app only (your own proxy in front)
+#   docker compose -f deploy/cloud/docker-compose.yml --profile caddy up -d --build       # + Caddy: HTTPS for DOMAIN
+#   docker compose -f deploy/cloud/docker-compose.yml --profile tunnel up -d --build      # + Cloudflare Tunnel instead
+#
+# Run exactly one copy: live interviews are held in this process, and two copies on one database would both launch bots.
+services:
+  app:
+    build:
+      context: ../..
+    image: recruence:latest
+    env_file: .env
+    environment:
+      REMOTE_DASHBOARD: "true"
+      DATA_DIR: /data
+    ports:
+      # Only on this host: HTTPS comes from Caddy, Cloudflare Tunnel or your own proxy in front of it.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - recruence-data:/data   # small files only (setup state); data lives in Neon, the key in SETTINGS_ENCRYPTION_KEY
+    restart: unless-stopped
+
+  # HTTPS on your own domain (DOMAIN in .env, its DNS A/AAAA record pointing at this server; ports 80 and 443 open).
+  caddy:
+    image: caddy:2.10
+    profiles: ["caddy"]
+    env_file: .env   # DOMAIN
+    command: ["sh", "-c", 'test -n "$$DOMAIN" || { echo "Set DOMAIN in deploy/cloud/.env"; exit 1; }; exec caddy reverse-proxy --from "$$DOMAIN" --to app:8000']
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy-data:/data
+    depends_on: [app]
+    restart: unless-stopped
+
+  # Or a named Cloudflare Tunnel (no open ports): create it in Cloudflare Zero Trust with a public hostname for
+  # http://app:8000, and put its token in TUNNEL_TOKEN.
+  cloudflared:
+    image: cloudflare/cloudflared:2025.10.0
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run   # the token comes from TUNNEL_TOKEN in .env
+    env_file: .env
+    depends_on: [app]
+    restart: unless-stopped
+
+volumes:
+  recruence-data:
+  caddy-data:

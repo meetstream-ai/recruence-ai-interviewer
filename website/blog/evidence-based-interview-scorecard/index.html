@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence-Based Interview Scorecard: Scoring With Quotes</title>
+<meta name="description" content="Learn how an evidence-based interview scorecard ties every score to a verbatim quote, and how code can reject AI scores the candidate never earned.">
+<link rel="canonical" href="https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/evidence-based-interview-scorecard/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#ff6b00">
+<meta property="og:site_name" content="Recruence Blog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Evidence-Based Interview Scorecard: Scoring With Quotes">
+<meta property="og:description" content="Learn how an evidence-based interview scorecard ties every score to a verbatim quote, and how code can reject AI scores the candidate never earned.">
+<meta property="og:url" content="https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/evidence-based-interview-scorecard/">
+<meta property="og:image" content="https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/covers/evidence-based-interview-scorecard.jpg">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Evidence-Based Interview Scorecard: Scoring With Quotes">
+<meta name="twitter:description" content="Learn how an evidence-based interview scorecard ties every score to a verbatim quote, and how code can reject AI scores the candidate never earned.">
+<meta name="twitter:image" content="https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/covers/evidence-based-interview-scorecard.jpg">
+<link rel="icon" type="image/png" href="../assets/mark-64.png">
+<link rel="alternate" type="application/rss+xml" title="Recruence Blog" href="https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/blog.css?v=23f43fb2ad">
+<script>try{var t=localStorage.getItem("rc-blog-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta property="article:published_time" content="2026-11-06"><meta property="article:modified_time" content="2026-11-06"><meta property="article:tag" content="Evaluation"><meta property="article:tag" content="Scorecards"><meta property="article:tag" content="Structured Interviews"><meta property="article:tag" content="LLM"><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Evidence-Based Interview Scorecard: Scoring With Quotes", "description": "Learn how an evidence-based interview scorecard ties every score to a verbatim quote, and how code can reject AI scores the candidate never earned.", "image": "https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/covers/evidence-based-interview-scorecard.jpg", "datePublished": "2026-11-06", "dateModified": "2026-11-06", "author": {"@type": "Organization", "name": "Recruence Engineering", "url": "https://github.com/meetstream-ai/Recruence-AI-Interviewer"}, "publisher": {"@type": "Organization", "name": "Recruence", "logo": {"@type": "ImageObject", "url": "https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/assets/mark.png"}}, "mainEntityOfPage": "https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/evidence-based-interview-scorecard/", "keywords": "interview scorecard, structured interview scoring, AI interview evaluation, hiring rubric, candidate ranking, interview evidence", "wordCount": 1534}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What should an interview scorecard include?", "acceptedAnswer": {"@type": "Answer", "text": "The competencies being assessed, a rating scale with what each level looks like, the evidence for each rating (ideally the candidate's own words), must-have requirements with a clear verdict, and the reviewer's final decision kept separate from any recommendation."}}, {"@type": "Question", "name": "How do you stop an AI from inventing interview evidence?", "acceptedAnswer": {"@type": "Answer", "text": "Check its quotes in code. Recruence compares every quote with what the candidate actually said, tolerating case, punctuation and small speech-recognition errors, and drops any quote it can't find. A score left without a quote isn't shown as a score."}}, {"@type": "Question", "name": "What does \"not enough evidence\" mean on a scorecard?", "acceptedAnswer": {"@type": "Answer", "text": "That the interview didn't produce the candidate's own words to support a verdict either way. It is not a fail. It tells the hiring team the question wasn't answered clearly, so they can follow up instead of guessing."}}, {"@type": "Question", "name": "How is a 1-5 rating turned into a score out of 100?", "acceptedAnswer": {"@type": "Answer", "text": "Recruence averages the assessed competencies on the 1-5 scale and multiplies by 20, so a 4.3 average becomes 86. Competencies without evidence are left out of the average, and the report says so."}}, {"@type": "Question", "name": "Should the AI's recommendation decide who advances?", "acceptedAnswer": {"@type": "Answer", "text": "No. Treat it as one input. Recruence ranks candidates from stored evaluations, but a person records the decision, and it is stored apart from the AI recommendation so both stay visible."}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Blog", "item": "https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/"}, {"@type": "ListItem", "position": 2, "name": "Evidence-Based Interview Scorecard: Scoring With Quotes", "item": "https://thalhaahamed.github.io/Recruence-AI-Interviewer/blog/evidence-based-interview-scorecard/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.png" alt="" width="32" height="32"><b>Recruence</b><small>Blog</small></a>
+  <nav class="nav" aria-label="Main"><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer#readme">Product</a><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/blob/main/docs/INTERVIEW_SETUP.md">Docs</a><a href="../" aria-current=page class=keep>Blog</a>
+    <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+    <a class="btn btn-primary" href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest">Download</a>
+  </nav>
+</div></header>
+<div class="progress" aria-hidden="true"><span></span></div>
+<main id="main">
+<header class="post-head"><div class="wrap"><div class="inner">
+  <a class="eyebrow" href="../">Evaluation</a>
+  <h1>Evidence-Based Interview Scorecard: Scoring With Quotes</h1>
+  <p class="dek">A score without a quote is an opinion. Here is how to build an interview scorecard where every rating points at the candidate&#x27;s own words, and code throws out the rest.</p>
+</div>
+<div class="byline">
+  <div class="who"><span class="avatar"><img src="../assets/mark.png" alt="" width="46" height="46"></span><div><b>Recruence Engineering</b><span><time datetime="2026-11-06">November 6, 2026</time> · 7 min read</span></div></div>
+  <div class="share" aria-label="Share"><a class="icon-btn" href="#" data-share="x" aria-label="Share on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4-5.6 6.4H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"/></svg></a><a class="icon-btn" href="#" data-share="linkedin" aria-label="Share on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.5c0-1.31-.02-3-1.83-3-1.83 0-2.11 1.43-2.11 2.9V21H9z"/></svg></a><a class="icon-btn" href="#" data-share="copy" aria-label="Copy the link"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></a></div>
+</div></div></header>
+<div class="wrap post-grid">
+  <aside class="rail rail-left" aria-label="Contents"><details open><summary class="toc-title">Contents</summary><nav class="toc"></nav></details></aside>
+  <article class="prose">
+<p>An <strong>interview scorecard</strong> turns a conversation into ratings you can compare across candidates. An evidence-based scorecard adds one rule: every rating must point at something the candidate actually said. No quote, no score. That single rule is the difference between a scorecard a hiring manager can trust and a confident-sounding summary nobody can check.</p>
+<p>The rule matters more once an AI writes the first draft. Language models are fluent summarisers and occasionally fluent inventors. Asked to justify a 5 for "system design," a model may paraphrase what it expected the candidate to say rather than what they said, and the paraphrase reads just as convincingly as the truth.</p>
+<p>Fortunately, this is one of the few AI problems you can check mechanically. If every piece of evidence must be a verbatim quote, your code can look for that quote in the transcript and reject it when it isn't there.</p>
+<p>In this article, we'll explore what belongs on an evidence-based scorecard, why AI evaluations need verification, how quote-checking works in practice, and how to turn ratings into a fair ranking. Let's get started!</p>
+
+<h2 id="what-is-an-evidence-based-interview-scorecard">What is an evidence-based interview scorecard?</h2>
+<p>A scorecard is the scoring half of a <a href="../ai-interviewer/">structured interview</a>. The questions are fixed in advance, each mapped to a competency, and the scorecard records how the candidate did on each one. Evidence-based means each rating carries its support with it.</p>
+<p>A useful one has five parts:</p>
+<ul>
+<li><strong>Competencies</strong> taken from the interview plan, in plan order, with the plan's names.</li>
+<li><strong>A rating scale</strong>, typically 1 to 5, with a short description of each level.</li>
+<li><strong>Evidence</strong>: the candidate's own words that justify the rating.</li>
+<li><strong>Must-have requirements</strong>, each judged meets, does not meet, or not enough evidence.</li>
+<li><strong>A decision</strong> recorded by a person, separate from any AI recommendation.</li>
+</ul>
+
+<h2 id="why-do-ai-interview-evaluations-need-verification">Why do AI interview evaluations need verification?</h2>
+<p>Because the failure is silent. A model that invents evidence doesn't produce an error; it produces a polished paragraph. Three patterns come up repeatedly when a model scores a transcript:</p>
+<ol>
+<li><strong>Paraphrase drift.</strong> The "quote" is a cleaner version of what was said, with the hedges removed. "I think we maybe used Kafka" becomes "used Kafka for event streaming."</li>
+<li><strong>Expectation filling.</strong> The model credits a competency the job description asks for, because a strong candidate would usually have it.</li>
+<li><strong>Wrong speaker.</strong> The interviewer's question gets attributed to the candidate: "We handle four hundred requests a second" was the prompt, not the answer.</li>
+</ol>
+<p>All three look fine in a report. All three can move a candidate above or below the pass mark. And none can be caught by reading the scorecard alone; you'd need the transcript open beside it, which is exactly the review step busy teams skip.</p>
+<div class="answer"><span class="label">The short answer</span><p>Ask the model for verbatim quotes, then verify them in code against what the candidate said. Anything that doesn't match is dropped, and a verdict that loses its only quote is downgraded, not kept.</p></div>
+
+<h2 id="how-does-quote-checking-work-in-practice">How does quote-checking work in practice?</h2>
+<p>The check is simple, which is why it works. Take only the candidate's lines from the transcript, normalise them, and look for each quote inside them.</p>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">From AI draft to a scorecard you can trust</div>
+    <div class="lanes">
+      <div class="lane"><b>AI draft</b><div class="chips"><span class="chip">score 1-5</span><span class="chip">quotes</span><span class="chip">verdicts</span></div></div>
+      <div class="lane"><b>Code checks</b><div class="chips"><span class="chip blue">quote in candidate's words?</span><span class="chip blue">competency in the plan?</span><span class="chip blue">score clamped 1-5</span></div></div>
+      <div class="lane"><b>Report</b><div class="chips"><span class="chip">kept scores</span><span class="chip">"not assessed"</span><span class="chip">"not enough evidence"</span></div></div>
+    </div>
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>Every rule the code can check is checked in code, not left to the prompt.</figcaption>
+</figure>
+<p>Here's a simplified version of the check Recruence runs. Real transcripts come from speech recognition, which mishears a word here and there, so longer quotes may match a stretch of speech closely rather than exactly:</p>
+<pre><code><span class="k">def</span> squash(text):
+    <span class="c"># lower case, punctuation and spacing ignored</span>
+    <span class="k">return</span> <span class="s">" "</span>.join(re.sub(<span class="s">r"[^a-z0-9]+"</span>, <span class="s">" "</span>, text.lower()).split())
+
+<span class="k">def</span> said_by_candidate(quote, candidate_text):
+    wanted, said = squash(quote), squash(candidate_text)
+    <span class="k">if</span> wanted <span class="k">in</span> said:
+        <span class="k">return True</span>
+    <span class="c"># 4+ words: accept a stretch of the same length that matches at least 85%</span>
+    <span class="k">return</span> len(wanted.split()) >= 4 <span class="k">and</span> best_window_ratio(wanted, said) >= 0.85</code></pre>
+<p>What happens after the check matters as much as the check:</p>
+<ul>
+<li><strong>A competency with no surviving quote has no score.</strong> It's shown as not assessed, not as weak. Missing evidence isn't evidence of weakness.</li>
+<li><strong>A meets or does-not-meet verdict without a quote becomes "not enough evidence".</strong> A pass or fail call has to rest on the candidate's words.</li>
+<li><strong>Scores are clamped to the scale</strong>, and competencies the plan didn't ask about are dropped.</li>
+</ul>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">An evaluation report with quoted evidence</div>
+    <img class="shot" src="../images/recruence-evidence-report.webp" alt="Recruence evaluation report with a score of 87 out of 100 and a must-have requirement backed by a quoted answer" width="1424" height="835" loading="lazy">
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>A report from Recruence's demo data: each verdict carries the quote it rests on.</figcaption>
+</figure>
+
+<h2 id="how-do-teams-score-interviews-today">How do teams score interviews today?</h2>
+<p>Most teams sit somewhere on a spectrum from free-text notes to strict rubrics. The table compares the common approaches on the property that matters most here: can someone else check the score?</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Approach</th><th>Consistency</th><th>Checkable later?</th><th>Typical weakness</th></tr></thead>
+<tbody>
+<tr><td>Free-text notes</td><td>Low</td><td>Only by the note-taker</td><td>Memory and impressions</td></tr>
+<tr><td>Rubric with ratings</td><td>Medium</td><td>Partly</td><td>Ratings without reasons</td></tr>
+<tr><td>AI summary</td><td>High</td><td>Rarely</td><td>Fluent but unverified</td></tr>
+<tr><td>Evidence-based scorecard</td><td>High</td><td>Yes, quote by quote</td><td>Needs a good transcript</td></tr>
+</tbody></table></div>
+<p>The research on structured interviews points the same way: consistent questions and consistent scoring predict job performance better than free-form conversations (<a href="https://doi.org/10.1037/apl0000994">Sackett et al., 2022</a>). Verification is how you keep that consistency once a model helps with the scoring. Regulation is heading there too; the EU AI Act expects high-risk hiring systems to keep records and support human oversight (<a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj">Regulation (EU) 2024/1689</a>).</p>
+
+<h2 id="how-recruence-builds-the-scorecard">How Recruence builds the scorecard</h2>
+<p>Recruence applies these rules after every interview. The plan's competencies are scored 1 to 5 with verbatim evidence; must-have requirements get exactly one verdict each; and every quote is checked against what the candidate said in the transcript, which is rebuilt from the call recording so the AI's own follow-ups are included.</p>
+<p>The report then adds what code can compute without any AI: key moments that jump to the quoted line in the transcript, and talk time showing the candidate's share of the words per question. The recruiter's decision (advance, hold or reject) is stored apart from the AI recommendation.</p>
+<p>The same evaluations feed the role's ranking. You can read more about how the interview that produces the transcript runs in <a href="../ai-interview-google-meet-zoom-teams/">our Google Meet, Zoom and Teams guide</a>, and the scoring code is in the <a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer">Recruence repository</a>.</p>
+
+<h2 id="how-do-you-turn-ratings-into-a-fair-ranking">How do you turn ratings into a fair ranking?</h2>
+<p>Once each candidate has a verified scorecard, ranking is mostly arithmetic, as long as you're explicit about the rules:</p>
+<ol>
+<li><strong>Average only the assessed competencies.</strong> In Recruence, the 1-5 average is multiplied by 20 to give a score out of 100, so a 4.3 average reads as 86. Missing competencies are excluded and flagged.</li>
+<li><strong>Set the pass mark before you look at results.</strong> Recruence's default is 70 out of 100. Changing it re-applies pass or fail to everyone; the scores themselves never change.</li>
+<li><strong>Break ties with requirements met</strong>, then let genuine ties share a rank instead of inventing an order.</li>
+<li><strong>List failed or missing evaluations separately.</strong> A candidate whose interview couldn't be evaluated shouldn't be ranked last; they should be followed up.</li>
+<li><strong>Compare competencies side by side</strong>, not just totals: two candidates on 80 can have very different strengths.</li>
+</ol>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">Candidates ranked against the pass mark</div>
+    <img class="shot" src="../images/recruence-role-ranking.webp" alt="Recruence role page ranking candidates by interview score with pass or fail against a 70 out of 100 pass mark" width="1424" height="835" loading="lazy">
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>A role's candidates ranked against the pass mark (demo data).</figcaption>
+</figure>
+
+<h2 id="what-to-take-away-about-interview-scorecards">What to take away about interview scorecards</h2>
+<p>A scorecard earns trust when anyone can trace each score back to the candidate's own words. That's achievable even with an AI writing the first draft: ask for verbatim quotes, verify them in code, downgrade anything that loses its evidence, and keep the decision with a person.</p>
+<p>If you'd like scorecards built that way, Recruence does it after every interview and ranks a role's candidates against your pass mark. The <a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer#readme">README</a> shows a full report from the demo data.</p>
+<h3 id="frequently-asked-questions">Frequently Asked Questions</h3>
+<div class="faq">
+<h4 id="what-should-an-interview-scorecard-include">What should an interview scorecard include?</h4>
+<p>The competencies being assessed, a rating scale with what each level looks like, the evidence for each rating (ideally the candidate's own words), must-have requirements with a clear verdict, and the reviewer's final decision kept separate from any recommendation.</p>
+<h4 id="how-do-you-stop-an-ai-from-inventing-interview-evidence">How do you stop an AI from inventing interview evidence?</h4>
+<p>Check its quotes in code. Recruence compares every quote with what the candidate actually said, tolerating case, punctuation and small speech-recognition errors, and drops any quote it can't find. A score left without a quote isn't shown as a score.</p>
+<h4 id="what-does-not-enough-evidence-mean-on-a-scorecard">What does &quot;not enough evidence&quot; mean on a scorecard?</h4>
+<p>That the interview didn't produce the candidate's own words to support a verdict either way. It is not a fail. It tells the hiring team the question wasn't answered clearly, so they can follow up instead of guessing.</p>
+<h4 id="how-is-a-1-5-rating-turned-into-a-score-out-of-100">How is a 1-5 rating turned into a score out of 100?</h4>
+<p>Recruence averages the assessed competencies on the 1-5 scale and multiplies by 20, so a 4.3 average becomes 86. Competencies without evidence are left out of the average, and the report says so.</p>
+<h4 id="should-the-ai-s-recommendation-decide-who-advances">Should the AI&#x27;s recommendation decide who advances?</h4>
+<p>No. Treat it as one input. Recruence ranks candidates from stored evaluations, but a person records the decision, and it is stored apart from the AI recommendation so both stay visible.</p>
+</div>
+    <div class="ask-ai"><span>Explore with AI</span>
+      <a class="pill" href="#" data-ask="perplexity" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></svg>Ask Perplexity</a>
+      <a class="pill" href="#" data-ask="chatgpt" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 5h16v11H9l-5 4z"/></svg>Open in ChatGPT</a>
+      <a class="pill" href="#" data-ask="claude"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M9 9h11v11H9zM5 15H4V4h11v1"/></svg>Copy for Claude</a>
+    </div>
+    <div class="end-cta">
+      <p class="cta-title">Get reports that quote the candidate</p>
+      <p>Recruence scores each competency from 1 to 5 with verbatim evidence, checks every quote against the transcript, and ranks a role&#x27;s candidates against your pass mark.</p>
+      <div class="row"><a class="btn btn-primary" href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest">Download Recruence</a><a class="btn btn-ghost" href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/blob/main/docs/INTERVIEW_SETUP.md">Read the setup guide</a></div>
+    </div>
+    <div class="tags-share">
+      <div><p class="cta-title">Tags</p><div class="tags"><span class="tag">Evaluation</span><span class="tag">Scorecards</span><span class="tag">Structured Interviews</span><span class="tag">LLM</span></div></div>
+      <div><p class="cta-title">Share</p><div class="share" aria-label="Share"><a class="icon-btn" href="#" data-share="x" aria-label="Share on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4-5.6 6.4H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"/></svg></a><a class="icon-btn" href="#" data-share="linkedin" aria-label="Share on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.5c0-1.31-.02-3-1.83-3-1.83 0-2.11 1.43-2.11 2.9V21H9z"/></svg></a><a class="icon-btn" href="#" data-share="copy" aria-label="Copy the link"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></a></div></div>
+    </div>
+  </article>
+  <aside class="rail rail-right" aria-label="About the author">
+    <div class="author-card"><span class="avatar"><img src="../assets/mark.png" alt="" width="46" height="46"></span><b>Recruence Engineering</b><p>We build Recruence, an open-source AI interviewer that runs structured interviews inside Google Meet, Zoom and Teams and hands back evidence-backed reports. We write about hiring workflows, voice agents and meeting APIs.</p>
+      <div class="links"><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer">GitHub</a><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest">Releases</a></div></div>
+    <div class="cta-card"><b>Run your first AI interview</b><p>Desktop app for Windows, macOS and Linux, or Docker. Bring your own AI.</p>
+      <a class="btn btn-primary" href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest">Download</a><a class="plain" href="https://github.com/meetstream-ai/Recruence-AI-Interviewer#readme">See how it works</a></div>
+  </aside>
+</div>
+<section class="related" aria-labelledby="related-title"><div class="wrap">
+  <h2 class="section-title" id="related-title">You might also like</h2>
+  <div class="cards"><a class="card-link" href="../ai-interviewer/" data-topic="build-guide">
+  <div class="thumb"><img src="../covers/ai-interviewer.webp" alt="MeetStream build guide cover: How to Automate Interviews With AI Using Recruence, with the Recruence AI interviewer linking a live call to a scored report" width="1600" height="900" loading="lazy"></div>
+  <div><span class="eyebrow">Build Guide</span>
+  <h3>How to Automate Interviews With AI Using Recruence</h3>
+  <p>Build an AI interviewer that joins Meet, Teams or Zoom, asks every candidate the same approved questions, enforces the rules in code, and lets a person decide.</p>
+  <div class="meta">November 10, 2026 · 15 min read</div></div>
+</a><a class="card-link" href="../ai-interview-google-meet-zoom-teams/" data-topic="dev-guide">
+  <div class="thumb"><img src="../covers/ai-interview-google-meet-zoom-teams.webp" alt="Recruence robot beside the title Run an AI interview in Google Meet, Zoom or Teams" width="1600" height="900" loading="lazy"></div>
+  <div><span class="eyebrow">Dev Guide</span>
+  <h3>How to Run an AI Interview in Google Meet, Zoom or Teams</h3>
+  <p>Learn how to run an AI interview in Google Meet, Zoom or Teams with a meeting bot: setup, public address, voice providers and fixes for what goes wrong.</p>
+  <div class="meta">November 3, 2026 · 7 min read</div></div>
+</a></div>
+</div></section>
+</main>
+<footer class="site-foot"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.png" alt="" width="26" height="26"><b>Recruence</b></a>
+  <nav aria-label="Footer"><a href="../">Blog</a><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer#readme">Product</a><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/blob/main/docs/INTERVIEW_SETUP.md">Docs</a><a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest">Download</a><a href="../feed.xml">RSS</a></nav>
+  <span>© 2026 Recruence contributors · MIT licensed</span>
+</div></footer>
+<button class="to-top" type="button" aria-label="Back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+<script src="../assets/blog.js?v=d39e8558d5" defer></script>
+</body>
+</html>

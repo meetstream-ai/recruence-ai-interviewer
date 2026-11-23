@@ -1,0 +1,286 @@
+<!--
+{
+  "title": "How to Automate Interviews With AI Using Recruence",
+  "seo_title": "How to Automate Interviews With AI Using Recruence",
+  "description": "Learn how to automate interviews with AI: a MeetStream bot joins Meet, Teams or Zoom, asks approved questions one at a time, and a person decides.",
+  "excerpt": "Build an AI interviewer that joins Meet, Teams or Zoom, asks every candidate the same approved questions, enforces the rules in code, and lets a person decide.",
+  "dek": "A step-by-step build guide: send a MeetStream bot into the call, give the voice agent tools instead of the plan, listen through webhooks, watch for failures, and turn the call into a report a person can trust.",
+  "keyword": "automate interviews with AI",
+  "secondary": [
+    "AI interviewer",
+    "structured interview",
+    "AI interview software",
+    "voice agent interview",
+    "automated screening interview"
+  ],
+  "category": "Build Guide",
+  "tags": [
+    "Build Guide",
+    "Structured Interviews",
+    "Voice Agents",
+    "Hiring"
+  ],
+  "published": "2026-11-10",
+  "featured": true,
+  "cover_title": "How to Automate Interviews With AI Using Recruence",
+  "cover_alt": "MeetStream build guide cover: How to Automate Interviews With AI Using Recruence, with the Recruence AI interviewer linking a live call to a scored report",
+  "cta": {
+    "title": "Run a structured AI interview on your own setup",
+    "text": "Recruence is open source, a companion app for MeetStream: approve a role's questions once, send candidates a link, and get a report with quoted evidence for a person to review.",
+    "button": "Get Recruence on GitHub",
+    "href": "https://github.com/meetstream-ai/Recruence-AI-Interviewer"
+  },
+  "faq": [
+    [
+      "What is an AI interviewer?",
+      "An AI interviewer is software that conducts a job interview by voice or text: it asks the questions, listens to the answers and asks follow-ups. A structured AI interviewer asks every candidate for a role the same approved questions in the same order, and records the conversation for a person to review."
+    ],
+    [
+      "Do candidates have to agree to an AI interview?",
+      "Yes, and they should be told in advance. Recruence's invitation explains that an AI conducts the interview and that it is recorded, and no question is released until the candidate agrees in the call. If they decline, nothing is evaluated, their words aren't kept, and MeetStream is asked to delete the recording."
+    ],
+    [
+      "Can an AI interviewer join Google Meet, Zoom or Teams?",
+      "Yes, through a meeting bot. Recruence uses <a href=\"https://docs.meetstream.ai\">MeetStream</a>'s bot and MIA voice agent, which join the candidate's own Google Meet, Microsoft Teams or Zoom call as a participant, so candidates don't install anything. Zoom needs a Zoom Meeting SDK app in MeetStream and the host's permission to record."
+    ],
+    [
+      "What happens if the AI stops talking mid-interview?",
+      "Your system should notice, because the voice agent may not report it. Recruence alerts the hiring team if the agent hasn't started within 90 seconds, ends the call after 5 minutes without a start, flags a question that stays open too long, and ends the call itself if the candidate asks to stop and the agent doesn't."
+    ],
+    [
+      "Is an AI interviewer legal to use?",
+      "It depends on where you hire. The EU AI Act treats AI used in recruitment as high-risk, and New York City requires bias audits and notices for automated employment decision tools. Get legal advice before using one with real candidates."
+    ]
+  ],
+  "cover_style": "object",
+  "cover_subtitle": "A build guide for hiring teams: an AI interviewer joins the call, asks your approved questions one at a time, and a person makes the decision.",
+  "updated": "2026-11-16"
+}
+-->
+<p>To <strong>automate interviews with AI</strong>, you hand the live conversation to an AI interviewer: a voice agent that joins the call, asks the questions, listens, follows up and hands the conversation back for a person to judge. The useful ones are <em>structured</em>. Every candidate for a role hears the same approved questions in the same order, which matters because structured interviews are among the strongest predictors of job performance in the research literature.</p>
+<p>That last point is also where most AI interview tools go wrong. A large language model left to "run an interview" will happily improvise: it rephrases questions, skips one when the conversation drifts, invents a new one when it feels clever. Each of those choices makes two candidates' interviews less comparable, which quietly undoes the reason you structured the interview in the first place.</p>
+<p>This guide shows how we built Recruence, an open-source AI interviewer and companion app for MeetStream, so that the model owns the conversation and your system owns the interview. It covers the bot that joins the call, the tools the voice agent gets instead of the plan, the webhooks that tell you what's happening, the safeguards for when the agent goes quiet, and how to run it where candidates can reach it. Every snippet is trimmed from Recruence's code. Let's get started!</p>
+<div class="answer"><span class="label">Key takeaways</span><p>Let the voice agent own the conversation and your service own the interview. Release approved questions one at a time through a tool call, enforce consent, follow-up limits and the time limit in code, watch the call for an agent that goes quiet, and leave the decision to a person with a report that quotes the candidate.</p></div>
+
+<h2>What does an AI interviewer system need?</h2>
+<p>Five pieces, each with one job:</p>
+<ul>
+<li><strong>A recruiter dashboard</strong> where a role's questions are written and approved once. Every candidate for that role gets exactly those questions.</li>
+<li><strong>A candidate link</strong>: the candidate confirms a code sent by email, reads a notice that an AI runs the interview and that it's recorded, and presses Start.</li>
+<li><strong>A MeetStream bot</strong> that joins the candidate's Google Meet, Microsoft Teams or Zoom call, with <a href="https://docs.meetstream.ai/guides/mia/mia-api-guide">MeetStream's MIA voice agent</a> doing the talking.</li>
+<li><strong>Your interview service</strong>, which releases questions one at a time, enforces consent, follow-up limits and the time limit, and keeps the record.</li>
+<li><strong>A report</strong> with notes per question, quoted evidence for each score, and a decision field that only a person fills in.</li>
+</ul>
+
+<h2>Why do structured interviews matter for hiring?</h2>
+<p>A structured interview fixes three things in advance: the questions, the order they're asked in, and how answers are scored. Everything else, from small talk to the follow-up wording, can flex. The point is comparability. When two candidates answer the same question, you can compare the answers instead of comparing two different conversations.</p>
+<p>The evidence for this is old and consistent. Decades of hiring research have found that structured interviews predict job performance better than unstructured ones (<a href="https://doi.org/10.1037/0033-2909.124.2.262">Schmidt and Hunter, 1998</a>), and a <a href="https://doi.org/10.1037/apl0000994">2022 re-analysis by Sackett and colleagues</a> ranks them among the strongest selection methods available.</p>
+<p>A language model optimises for a good conversation, not for a fair comparison. Left to run the interview itself, it tends to:</p>
+<ul>
+<li><strong>Skip questions.</strong> Given the whole plan at once, it can move on before a question is asked, or run out of time before the last one.</li>
+<li><strong>Reword questions.</strong> Small rewordings change what a question measures. "Tell me about a hard deadline" and "tell me about a missed deadline" invite different stories.</li>
+<li><strong>Over-follow-up.</strong> An engaged candidate can pull it into follow-up after follow-up on one question, crowding out the rest.</li>
+<li><strong>Go quiet without saying so.</strong> A voice agent that stalls doesn't always report an error.</li>
+</ul>
+<div class="answer"><span class="label">The short answer</span><p>The model should own the conversation; your system should own the interview. Questions, order, consent, follow-up limits and time limits are rules, and rules belong in code you control.</p></div>
+
+<h2>What do you need before you start?</h2>
+<p>Gather these first; the build steps below assume them:</p>
+<ul>
+<li><strong>A MeetStream account and API key.</strong> The bot, the voice agent, recording and transcription all run on MeetStream.</li>
+<li><strong>Voice keys in MeetStream → Integrations</strong> for the agent's three parts: speech-to-text (for example Deepgram), the conversation model (for example Gemini) and text-to-speech (for example ElevenLabs).</li>
+<li><strong>An AI provider for your own service</strong>, which writes interview plans and evaluates answers: Gemini, Claude, OpenAI or a compatible server, xAI, or a local Ollama model. Use a paid tier for real candidates.</li>
+<li><strong>A public HTTPS address</strong> where MeetStream can reach your service: a tunnel for a desktop install, or a cloud backend (step 7).</li>
+<li><strong>A meeting platform:</strong> Google Meet, Microsoft Teams, or Zoom with a Zoom Meeting SDK app set up in MeetStream.</li>
+<li><strong>Email (SMTP)</strong> for invitations and the candidate's access code.</li>
+</ul>
+
+<h2>How do you automate interviews with AI, step by step?</h2>
+<p>Seven steps, in the order a call happens: from sending the bot in to running the whole thing where candidates can reach it.</p>
+<h3>Step 1: Send a bot into the candidate's call</h3>
+<p>The bot is the AI interviewer's seat in the meeting. One call to MeetStream's <code>create bot</code> endpoint sends it to the meeting link, with two webhook addresses for what happens next and a voice agent attached. This is the payload Recruence sends, trimmed:</p>
+<pre><code>{
+  <span class="k">"meeting_link"</span>: <span class="s">"https://meet.google.com/abc-defg-hij"</span>,
+  <span class="k">"bot_name"</span>: <span class="s">"AI Interviewer"</span>,
+  <span class="k">"agent_config_id"</span>: <span class="s">"&lt;the interview's voice agent&gt;"</span>,
+  <span class="k">"callback_url"</span>: <span class="s">"https://your-app/webhooks/meetstream/&lt;session token&gt;/events"</span>,
+  <span class="k">"live_transcription_required"</span>: {
+    <span class="k">"webhook_url"</span>: <span class="s">"https://your-app/webhooks/meetstream/&lt;session token&gt;/transcript"</span>
+  },
+  <span class="k">"recording_config"</span>: {
+    <span class="k">"transcript"</span>: { <span class="k">"provider"</span>: { <span class="k">"meetstream_streaming"</span>: { <span class="k">"transcription_mode"</span>: <span class="s">"sentence"</span> } } },
+    <span class="k">"retention"</span>: { <span class="k">"type"</span>: <span class="s">"timed"</span>, <span class="k">"hours"</span>: 24 }
+  },
+  <span class="k">"automatic_leave"</span>: {
+    <span class="k">"waiting_room_timeout"</span>: 600,
+    <span class="k">"everyone_left_timeout"</span>: 120,
+    <span class="k">"voice_inactivity_timeout"</span>: 600
+  }
+}</code></pre>
+<p>Three details that matter in practice:</p>
+<ul>
+<li><strong>Raise the voice inactivity timeout.</strong> Candidates pause to think. With the default, a long pause can end the call mid-interview.</li>
+<li><strong>Each session gets its own secret token in the webhook addresses.</strong> A guessed or old address finds nothing, and the token never appears in your logs: Recruence's log filter replaces every token in a path with <code>***</code>.</li>
+<li><strong>Each platform admits the bot differently.</strong> On Google Meet the host's meeting must have started. On Teams the bot waits in the lobby until someone admits it. On Zoom, the bot needs a Zoom Meeting SDK app set up in MeetStream, and the host must allow it to record. The <a href="../ai-interview-google-meet-zoom-teams/">Google Meet, Zoom and Teams guide</a> covers each platform's setup.</li>
+</ul>
+
+<p>Recruiters rarely want to paste meeting links. If a calendar is connected in MeetStream, Recruence offers its upcoming Google Meet, Teams and Zoom meetings in a picker that fills in the link and start time. MeetStream answers from its own copy of the calendar, so Recruence also passes on why that copy might be out of date: when MeetStream can't refresh its sign-in to the calendar, the picker says so and asks you to reconnect the calendar in MeetStream.</p>
+
+<h3>Step 2: Give the voice agent tools, not the plan</h3>
+<p>This is the core of the design. The voice agent never sees the whole question list. It gets three custom functions, and your service answers each call. The agent can't ask question three until your service hands it question three.</p>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">One question at a time, released by your system</div>
+    <div class="flow">
+      <div class="step">Join the call<small>bot admitted from the lobby</small></div><span class="arrow">→</span>
+      <div class="step hot">Consent<small>no question before a yes</small></div><span class="arrow">→</span>
+      <div class="step">Fetch Q1<small>via next_question</small></div><span class="arrow">→</span>
+      <div class="step">Answer + follow-ups<small>each one asked for first</small></div><span class="arrow">→</span>
+      <div class="step">Repeat<small>until the plan says done</small></div>
+    </div>
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>The agent asks for each question; the plan never leaves your service in one piece.</figcaption>
+</figure>
+<ul>
+<li><code>next_question</code> returns the next approved question word for word, or <code>consent_required</code>, or <code>done</code>.</li>
+<li><code>follow_up</code> is called before every follow-up and answers <code>ok</code> or <code>limit_reached</code>.</li>
+<li><code>end_interview</code> closes the call after the goodbye, with a reason: <code>completed</code>, <code>consent_declined</code> or <code>candidate_stopped</code>.</li>
+</ul>
+<p>Here are two of them, trimmed from the agent configuration Recruence sends to MeetStream. Every call carries a bearer token that only your service knows:</p>
+<pre><code>[
+  {
+    <span class="k">"name"</span>: <span class="s">"next_question"</span>,
+    <span class="k">"description"</span>: <span class="s">"Get the next planned interview question. First call: after the candidate
+      agrees, with candidate_consented true. Returns status \"question\" with the question
+      to ask word for word, \"consent_required\", or \"done\"."</span>,
+    <span class="k">"method"</span>: <span class="s">"POST"</span>,
+    <span class="k">"url"</span>: <span class="s">"https://your-app/webhooks/mia/&lt;session token&gt;/next_question"</span>,
+    <span class="k">"parameters"</span>: {
+      <span class="k">"candidate_consented"</span>: { <span class="k">"type"</span>: <span class="s">"boolean"</span> },
+      <span class="k">"previous_question_id"</span>: { <span class="k">"type"</span>: <span class="s">"string"</span> },
+      <span class="k">"answer_note"</span>: { <span class="k">"type"</span>: <span class="s">"string"</span> },
+      <span class="k">"follow_ups_asked"</span>: { <span class="k">"type"</span>: <span class="s">"integer"</span> }
+    }
+  },
+  {
+    <span class="k">"name"</span>: <span class="s">"follow_up"</span>,
+    <span class="k">"description"</span>: <span class="s">"Call this before each follow-up question. Returns status \"ok\" (ask your
+      follow-up) or \"limit_reached\" (don't ask it: call next_question to move on)."</span>,
+    <span class="k">"method"</span>: <span class="s">"POST"</span>,
+    <span class="k">"url"</span>: <span class="s">"https://your-app/webhooks/mia/&lt;session token&gt;/follow_up"</span>,
+    <span class="k">"parameters"</span>: { <span class="k">"question_id"</span>: { <span class="k">"type"</span>: <span class="s">"string"</span> } }
+  }
+]</code></pre>
+<p>Four rules live on the service side, where the model can't talk its way around them:</p>
+<ol>
+<li><strong>The consent gate.</strong> Until the agent reports a clear yes, <code>next_question</code> answers <code>consent_required</code> and releases nothing.</li>
+<li><strong>Order.</strong> The tool only ever returns the next question in the approved plan, so nothing is skipped or reordered.</li>
+<li><strong>Follow-up limits.</strong> The agent must ask before each follow-up, and the service counts. A limit written only in the prompt is a suggestion; a limit the service enforces is a rule.</li>
+<li><strong>The time limit.</strong> Once the interview's time is up, <code>next_question</code> answers <code>done</code> instead of releasing another question, and the agent closes the interview.</li>
+</ol>
+<p>One more rule concerns the candidate's side of the turn: when is an answer finished? A voice agent decides from silence, and interview answers are full of thinking pauses. Recruence lets the candidate decide instead:</p>
+<ul>
+<li><strong>Say it up front.</strong> The AI's opening and the notice in the meeting chat tell the candidate: "Take your time with each answer; pauses are fine. When you've finished, just say 'that's my answer'."</li>
+<li><strong>Treat a pause as thinking time.</strong> The agent's instructions say a pause on its own doesn't end an answer. If an answer trails off, the agent says at most "Take your time." and keeps listening, and it never calls <code>next_question</code> or <code>follow_up</code> while an answer is in progress.</li>
+<li><strong>Wait longer before replying.</strong> MIA's endpointing is set to dynamic, with up to 8 seconds of silence before the agent takes its turn.</li>
+</ul>
+<p>Why not let the candidate mute their microphone to say "done"? Because the bot can't see it: MeetStream reports participants joining and leaving, not microphones going on or off, and there's no documented way to tell a running voice agent to reply now. A spoken cue works on every platform.</p>
+<p>Because every question passes through your service, the record is exact: you know which answer belongs to which question, which is what makes the <a href="../evidence-based-interview-scorecard/">evidence-based scorecard</a> afterwards possible.</p>
+
+<h3>Step 3: Listen to the call through webhooks</h3>
+<p>MeetStream reports the call to the two addresses from step 1:</p>
+<ul>
+<li><strong>Events</strong> say where the bot is: waiting in the lobby, in the meeting, recording, leaving, stopped. They also carry errors from the voice agent, such as its AI provider refusing a request.</li>
+<li><strong>Live transcript</strong> lines arrive sentence by sentence, with the speaker's name from the meeting. Recruence files each line under the question that was open when it was spoken.</li>
+</ul>
+<p>Callbacks aren't retried, so Recruence also polls the bot's status as a backup. Two things to know about transcripts: speaker labels are exact on Zoom and approximate on Teams (it reports the dominant speaker), and on Teams the transcript doesn't include the bot's own voice. Recruence records each question's text itself, so the report always shows what was asked.</p>
+
+<h3>Step 4: Watch the call for problems</h3>
+<p>A voice agent can go quiet, get stuck on a question, or miss a candidate's request to stop, without the platform reporting an error. So Recruence watches the call itself:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>What goes wrong</th><th>What Recruence does</th></tr></thead>
+<tbody>
+<tr><td>The agent hasn't started 90 seconds after joining</td><td>Alerts the hiring team and tells the candidate in the meeting chat to stay on</td></tr>
+<tr><td>Still nothing after 5 minutes</td><td>Ends the call. Nothing the candidate said is kept: there was no consent yet</td></tr>
+<tr><td>On Zoom, recording isn't allowed yet</td><td>Starts those clocks only once the host allows recording, since the agent can't work before then</td></tr>
+<tr><td>A question stays open far longer than its share of the time</td><td>Flags it and tells the candidate they can ask the AI to move on</td></tr>
+<tr><td>The candidate asks to stop and the agent carries on</td><td>Ends the call itself 25 seconds later</td></tr>
+<tr><td>The agent's AI provider or voice fails (for example, a quota error, or text-to-speech that returns no audio)</td><td>Logs it, alerts the hiring team, and tells the candidate there's a technical problem. If the agent hasn't recovered after 2 minutes, it ends the call</td></tr>
+<tr><td>The questions are finished but the agent doesn't hang up</td><td>Ends the call itself 45 seconds after the last question</td></tr>
+</tbody></table></div>
+<p>Every alert becomes a flag on the interview, shown under "To review" in the dashboard, so nobody has to watch the call live.</p>
+
+<h3>Step 5: Show the candidate what's happening</h3>
+<p>Candidates should never wonder what the AI is doing. Recruence posts an AI-interview notice in the meeting chat when the bot joins, and each question as it's asked ("Question 2 of 3: …"), so a candidate who misheard can read it. On Zoom, Recruence doesn't post in the chat; the AI reads each question aloud.</p>
+<p>Before the call, the candidate's link asks for the code from their email and shows the notice, and the interview starts only when they press Start. Opening the link alone never sends a bot.</p>
+
+<h3>Step 6: Turn the call into a report a person can trust</h3>
+<p>When the call ends, Recruence builds the report from its own record: each question with the agent's answer note and the follow-ups asked, the transcript, how much the candidate spoke, and an evaluation where every score quotes something the candidate actually said. The recommendation is the AI's; the decision is a separate field that only a person sets.</p>
+<p>Consent decides what's kept. If the candidate declines, nothing is evaluated, their words are dropped, and MeetStream is asked to delete the recording. Recordings are also kept only for the retention time set in step 1.</p>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">Every score quotes the candidate</div>
+    <img class="shot" src="../images/recruence-evidence-report.webp" alt="Recruence evaluation report with a score of 87 out of 100 and a must-have requirement backed by a quoted answer" width="1424" height="835" loading="lazy">
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>A Recruence report (demo data): the score, the recommendation, and each requirement backed by the candidate's own words.</figcaption>
+</figure>
+<p>To get results into the rest of your hiring stack, Recruence sends a signed webhook (HMAC-SHA256) when a report is ready, and can post results to an applicant tracking system. Both are signed, and retried if the receiving system is briefly unavailable.</p>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">A role's five setup steps</div>
+    <img class="shot" src="../images/recruence-role-setup-steps.webp" alt="Recruence role setup in five steps: questions, assignment, interview mode, settings and review" width="1424" height="835" loading="lazy">
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>A role's setup: the questions are approved once, then reused for every candidate.</figcaption>
+</figure>
+
+<h3>Step 7: Run it where candidates can reach it</h3>
+<p>MeetStream has to reach your webhooks, so your service needs a public HTTPS address. Recruence runs two ways:</p>
+<ul>
+<li><strong>On your computer</strong>, as a desktop app for Windows, macOS or Linux, with a tunnel for MeetStream's callbacks. Fine for trying it; interviews need the computer on.</li>
+<li><strong>As a cloud backend</strong>, a Docker container behind HTTPS, so interviews run with every recruiter's computer off. It runs in Docker behind Caddy or on platforms like Railway, with PostgreSQL or a Neon database.</li>
+</ul>
+<p>Each interview is its own session, with its own bot, voice agent, webhook token, transcript and report, so several can run at once from one install. Three ran side by side on one desktop install, and when MeetStream refused one bot, only that interview failed.</p>
+<p>When you deploy it:</p>
+<ul>
+<li><strong>Refuse plain HTTP.</strong> If a proxy forwards plain http, Recruence redirects page loads to HTTPS and refuses sign-ins and applications outright, so a password never travels unencrypted.</li>
+<li><strong>Trust only your proxy.</strong> List your platform's proxy addresses in <code>TRUSTED_PROXIES</code> (on Railway, <code>100.64.0.0/10</code>) so the backend knows visits arrive over HTTPS.</li>
+<li><strong>The server's address wins.</strong> When a desktop install moves to the cloud, a public address saved earlier (the old tunnel) is ignored, so candidate links and callbacks don't point at a computer that's off.</li>
+<li><strong>Run near the database.</strong> Put the backend in the same region as your Neon database; every request makes several round trips to it.</li>
+<li><strong>Give monitors a real readiness check.</strong> <code>/api/health/ready</code> answers 503 while the database is down, and every other request gets a clear "try again in a minute" instead of an error page.</li>
+</ul>
+
+<h2>Where do AI interviewers sit in the hiring market?</h2>
+<p>"AI interview" covers several quite different products. The differences matter more than the label, especially for candidates.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Format</th><th>How it works</th><th>Candidate experience</th><th>Main trade-off</th></tr></thead>
+<tbody>
+<tr><td>One-way video</td><td>Candidate records answers to fixed prompts</td><td>Talking to a camera, no interaction</td><td>Consistent, but no follow-ups</td></tr>
+<tr><td>Chat screening</td><td>Text questions in a web form or chat</td><td>Fast, low effort</td><td>Shallow; easy to answer with AI help</td></tr>
+<tr><td>Live AI voice interview</td><td>A voice agent asks and follows up in a real call</td><td>Closest to a phone screen</td><td>Needs structure, consent and good audio</td></tr>
+<tr><td>Human interview</td><td>A person asks and judges</td><td>Personal</td><td>Expensive, hard to keep consistent</td></tr>
+</tbody></table></div>
+<p>Regulators are paying attention to all of them. In the EU, AI used in recruitment counts as high-risk under the AI Act, with duties around transparency, human oversight and record keeping, and New York City requires bias audits and candidate notices for automated hiring tools.</p>
+<p>The design in this guide lines up with those obligations rather than fighting them: a fixed plan is auditable, a consent gate is a notice you can prove, and a separate human decision is human oversight. Treat that as a floor, not legal advice.</p>
+
+<h2>How should you roll out an AI interviewer?</h2>
+<p>When you first automate interviews with AI, start small and keep a person in the loop. This checklist is what we'd do with any AI interviewer, ours included:</p>
+<ol>
+<li><strong>Pick one role with a clear job description.</strong> Screening interviews for well-defined roles are the easiest place to start.</li>
+<li><strong>Write four to six questions mapped to competencies</strong>, each with what a good answer shows. Approve them before any candidate sees them.</li>
+<li><strong>Set follow-up limits and an interview length</strong> so a long answer to question one can't crowd out question four.</li>
+<li><strong>Tell candidates before the call</strong> that an AI runs the interview, that it's recorded, and how to ask for a human interviewer instead.</li>
+<li><strong>Run a pre-flight check before each live session</strong>: AI quota, the MeetStream key, that MeetStream can reach your public address, and the role's questions.</li>
+<li><strong>Run it on yourself first</strong>, on the meeting platform your candidates use, with headphones and without.</li>
+<li><strong>Review every report</strong> with the transcript open for the first few weeks. Check that each score rests on something the candidate actually said, and check the "To review" flags.</li>
+</ol>
+
+<h2>What to take away about AI interviewers</h2>
+<p>To automate interviews with AI and keep them fair, remember that an AI interviewer is only as fair as its structure, and only as reliable as the system watching it. The model is good at the parts humans find tiring, like listening closely, asking a natural follow-up and keeping time. It's bad at the parts that need to be rules. Put the questions, their order, consent, the limits and the record in your own system, release questions one at a time, watch the call, and keep the decision with a person.</p>
+<p>Recruence is open source, a companion app for MeetStream: approve a role's questions, send a candidate a link, and read a report that quotes the candidate for every score. The <a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/blob/main/docs/INTERVIEW_SETUP.md">setup guide</a> covers your first real interview.</p>
+<!--faq-->

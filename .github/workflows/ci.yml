@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (${{ matrix.database }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgresql]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: mia
+          POSTGRES_PASSWORD: mia
+          POSTGRES_DB: mia_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mia -d mia_test" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-postgres.txt
+      - name: pytest
+        env:
+          TEST_DATABASE_URL: ${{ matrix.database == 'postgresql' && 'postgresql://mia:mia@localhost:5432/mia_test' || '' }}
+        run: python -m pytest -q
+      - name: Dependency audit
+        if: matrix.database == 'sqlite'
+        run: pip install pip-audit && pip-audit -r requirements.txt -r requirements-postgres.txt
+
+  ui:
+    name: Dashboard UI (browser)
+    # Pinned: ubuntu-latest became 26.04, which Playwright 1.58 can't install Chromium on (CI run 43141418712).
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-ui.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Browser tests
+        env:
+          RECRUENCE_UI_BROWSER: chromium
+          RECRUENCE_UI_REQUIRED: "1"  # fail, never skip, when the browser can't start
+        run: python -m pytest -q tests/ui
+
+  frontend:
+    name: Dashboard scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check (no build step)
+        run: for f in app/web/*.js desktop/*.js desktop/scripts/*.js examples/demo-company-site/*.js; do node --check "$f"; done
+      - name: Desktop app logic (node --test)
+        run: node --test desktop/dashboard.test.js
+
+  desktop:
+    name: Windows desktop app
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Python environment (.venv, as in docs/ELECTRON.md)
+        run: |
+          python -m venv .venv
+          .venv\Scripts\pip install -r requirements.txt -r requirements-postgres.txt -r requirements-desktop.txt
+      - run: npm ci
+      - name: Build the installer
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        # Never publish from CI (a tagged commit would otherwise make electron-builder try to upload to GitHub).
+        run: npm run package:win -- --publish never
+      - name: Launch check (built app)
+        env:
+          MIA_USERDATA: ${{ runner.temp }}\mia-smoke
+        run: npm run test:smoke -- --unpacked
+      # The installer isn't stored: releases attach it (release.yml), and Actions artifact storage is small.
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t recruence:ci .
+      - name: Start and probe /api/health
+        run: |
+          docker run -d --name mia -p 8000:8000 recruence:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && exit 0; sleep 2; done
+          docker logs mia; exit 1

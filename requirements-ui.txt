@@ -1,0 +1,3 @@
+# Dashboard browser tests only (tests/ui, release validation B-12). Not needed to run Recruence or its other tests.
+# Locally on Windows they use the installed Microsoft Edge; in CI: python -m playwright install --with-deps chromium
+playwright==1.58.0

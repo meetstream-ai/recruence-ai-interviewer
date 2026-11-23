@@ -1,0 +1,119 @@
+<!--
+{
+  "title": "How to Run an AI Interview in Google Meet, Zoom or Teams",
+  "seo_title": "How to Run an AI Interview in Google Meet, Zoom or Teams",
+  "description": "Learn how to run an AI interview in Google Meet, Zoom or Teams: the meeting bot, public address, voice providers, consent and the fixes for common failures.",
+  "excerpt": "Learn how to run an AI interview in Google Meet, Zoom or Teams with a meeting bot: setup, public address, voice providers and fixes for what goes wrong.",
+  "dek": "A practical walkthrough of putting an AI interviewer into a real call: how the bot joins, what has to be reachable from the internet, which providers to pick, and how to read the failures.",
+  "keyword": "AI interview in Google Meet",
+  "secondary": ["meeting bot", "Zoom AI interview", "Microsoft Teams AI interview", "voice agent", "MeetStream"],
+  "category": "Dev Guide",
+  "tags": ["Dev Guide", "Google Meet", "Zoom", "Microsoft Teams", "MeetStream"],
+  "published": "2026-11-03",
+  "cover_title": "Run an AI interview in Google Meet, Zoom or Teams",
+  "cover_alt": "Recruence robot beside the title Run an AI interview in Google Meet, Zoom or Teams",
+  "cta": {"title": "Put an AI interviewer in your next call", "text": "Recruence's desktop app runs on Windows, macOS and Linux. Add a MeetStream key and a public address, and your first candidate can start an interview from a link.", "button": "Download Recruence", "href": "https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest"},
+  "faq": [
+    ["Can an AI join a Google Meet call?", "Yes. A meeting bot service such as <a href=\"https://docs.meetstream.ai\">MeetStream</a> joins the Meet link as a participant. Someone in the call admits it from the lobby, then a voice agent can listen and speak through it."],
+    ["Does the candidate need to install anything?", "No. The bot joins the candidate's normal Google Meet, Zoom or Teams call from the provider's servers, so the candidate uses the meeting app they already have."],
+    ["Why does my AI interviewer stop talking in the middle of the call?", "Usually the conversation model failed: a timeout (504) or an exhausted quota (429). Check the server log for the agent error. Free tiers often allow too few requests a day for a full interview."],
+    ["Why does the Zoom interview never start?", "Zoom requires a Meeting SDK app. Configure one in MeetStream, and make sure the meeting belongs to the same Zoom account as that app."],
+    ["Does an AI interview need a public URL?", "Yes. The meeting bot calls your app back during the interview (to fetch each question and report events), and candidates open their interview link, so the app must be reachable over HTTPS, for example through a domain or a Cloudflare tunnel."]
+  ]
+}
+-->
+<p>To run an <strong>AI interview in Google Meet</strong>, Zoom or Teams, you send a meeting bot into the candidate's call and connect a voice agent to it. The bot joins like any participant, someone admits it from the lobby, and the agent talks to the candidate through it. In our Google Meet tests the bot was in the meeting about 17 to 23 seconds after launch.</p>
+<p>The hard parts aren't in the call itself. They're around it: making your app reachable from the internet, choosing voice providers that won't run out of quota mid-interview, and handling each platform's rules for who can join.</p>
+<p>A meeting bot is a server-side participant that a provider runs for you. It joins by link, streams audio both ways and reports events, such as being admitted or the call ending, back to your app through webhooks.</p>
+<p>In this article, we'll explore how the bot and the voice agent fit together, what has to be reachable from the internet, platform-by-platform rules for Meet, Zoom and Teams, a step-by-step setup, and the failures you'll most likely meet. Let's get started!</p>
+
+<h2>How does an AI interviewer get into a meeting?</h2>
+<p>Three pieces work together. Your app holds the interview: the approved questions, the consent rule and the record. A meeting bot provider runs the participant that joins the call. A voice agent, hosted by that provider, listens to the candidate and speaks.</p>
+<figure class="figure">
+  <div class="card">
+    <div class="card-head"><img src="../assets/mark.png" alt="" width="20" height="20">Recruence</div>
+    <div class="card-title">Who talks to whom during an AI interview</div>
+    <div class="flow">
+      <div class="step">Your app<small>plan, consent, record</small></div><span class="arrow">⇄</span>
+      <div class="step hot">MeetStream<small>bot + voice agent</small></div><span class="arrow">⇄</span>
+      <div class="step">Meet / Zoom / Teams<small>the candidate's call</small></div>
+    </div>
+    <div class="card-foot">recruence / blog</div>
+  </div>
+  <figcaption>The agent fetches each question from your app; the platform only sees a participant.</figcaption>
+</figure>
+<p>Recruence uses <a href="https://docs.meetstream.ai">MeetStream</a> for the last two pieces. When an interview starts, Recruence creates a voice agent configuration (the providers, the instructions and two tools, <code>next_question</code> and <code>end_interview</code>), then asks MeetStream to send a bot to the meeting link with that agent. The <a href="../ai-interviewer/">structured AI interviewer</a> article explains why the questions come through a tool instead of the instructions.</p>
+
+<h2>What has to be reachable from the internet?</h2>
+<p>This is the step that trips up most first attempts. During the call, MeetStream calls your app: the agent fetches each question from <code>/webhooks/mia/…/next_question</code>, and the bot reports events and the live transcript to <code>/webhooks/meetstream/…</code>. Candidates also open their interview link on your app. All of that needs a public HTTPS address that leads to <em>your app</em>.</p>
+<ul>
+<li><strong>For a quick test,</strong> a <a href="https://try.cloudflare.com/">Cloudflare quick tunnel</a> gives your local app a temporary <code>https://….trycloudflare.com</code> address.</li>
+<li><strong>For real use,</strong> a domain with a reverse proxy, or a named tunnel, so the address doesn't change on every restart.</li>
+</ul>
+<pre><code><span class="c"># Recruence desktop app listens on 127.0.0.1:8765</span>
+cloudflared tunnel --url http://127.0.0.1:8765</code></pre>
+<div class="note"><span class="label">A common mistake</span><p>A tunnel that leads to another app on the same machine, say your careers website, resolves and answers, but MeetStream's calls never reach the interview. Recruence's Public URL check says exactly that: it reports the HTTP status the address returned and whether it's this app, another copy of Recruence, or something else.</p></div>
+<p>Only the candidate-facing and webhook paths answer through the public address; the recruiter dashboard stays on your own machine or network.</p>
+
+<h2>What are the rules for Google Meet, Zoom and Teams?</h2>
+<p>Each platform decides who may join and how. These are the rules that mattered in our live tests:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Platform</th><th>What the bot needs</th><th>Who admits it</th><th>Notes from testing</th></tr></thead>
+<tbody>
+<tr><td>Google Meet</td><td>A Meet link; nothing extra</td><td>Anyone in the call, from the lobby</td><td>Full interviews ran end to end. Start the meeting before the bot arrives.</td></tr>
+<tr><td>Microsoft Teams</td><td>A guest-joinable meeting link</td><td>The organiser or a participant</td><td>Worked end to end with consumer <code>teams.live.com</code> meetings.</td></tr>
+<tr><td>Zoom</td><td>A Zoom Meeting SDK app set up in MeetStream</td><td>The host, if a waiting room is on</td><td>The meeting must belong to that app's Zoom account (<a href="https://developers.zoom.us/docs/meeting-sdk/">Zoom Meeting SDK</a>).</td></tr>
+</tbody></table></div>
+<p>For a self-serve interview, a reusable room per role works well: create one Google Meet with a long time window (for example a calendar event spanning the interview week) and use its link as the role's interview room. Recruence books the room one interview at a time, so two candidates never land in it together. Google explains how to create a meeting for later in its <a href="https://support.google.com/meet/answer/9302870">Meet help</a>.</p>
+
+<h2>Which voice providers should you choose?</h2>
+<p>A pipeline voice agent has three parts: speech-to-text, a conversation model and a voice. MeetStream supports several providers for each, and you can mix them. The constraint is that each provider's key lives in MeetStream's Integrations, and each one has its own limits.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Setup</th><th>Speech-to-text → conversation → voice</th><th>Result in our tests</th></tr></thead>
+<tbody>
+<tr><td>All xAI</td><td>xAI → Grok → xAI voice</td><td>Worked end to end on Meet and Teams</td></tr>
+<tr><td>Gemini pipeline</td><td>Deepgram → Gemini → ElevenLabs</td><td>Worked end to end on Meet with <code>gemini-3.6-flash</code></td></tr>
+<tr><td>Gemini free tier</td><td>Same, free quota</td><td>Stopped after two questions: 20 requests a day per model</td></tr>
+<tr><td>Gemini Live (realtime)</td><td>One model hears, thinks and speaks</td><td>Unreliable tool calls; not ready for interviews yet</td></tr>
+</tbody></table></div>
+<p>Each turn of the conversation is a model request, so a 20-minute interview easily needs forty or more. Size your quota for that before a candidate is on the call.</p>
+
+<h2>How Recruence handles the call for you</h2>
+<p>Recruence wires the pieces together so a recruiter only deals with links. A role has one interview room; each eligible candidate gets a personal interview link; the candidate opens it, confirms a one-time code sent to their email, and presses Start. The bot joins the role's room, and the interview follows the role's approved questions.</p>
+<p>Around the call, it does the checks that save a failed interview:</p>
+<ul>
+<li><strong>Before launch:</strong> the Public URL must resolve and lead to this app, and the voice setup must cover speech-to-text, conversation and voice.</li>
+<li><strong>During the call:</strong> the live transcript and interviewer notes appear in the dashboard; if the agent reports an error and doesn't recover within two minutes, the interview is ended cleanly.</li>
+<li><strong>After the call:</strong> the bot leaves, its agent configuration is deleted, the transcript is rebuilt from the recording, and the <a href="../evidence-based-interview-scorecard/">evidence-based scorecard</a> is written.</li>
+</ul>
+<p>Prefer to drive it from your own code? The same flow is an HTTP API; starting an interview that's ready is one call:</p>
+<pre><code>curl -X POST https://your-recruence.example/api/interviews/<span class="s">$INTERVIEW_ID</span>/launch \
+  -H <span class="s">"Authorization: Bearer $APP_ACCESS_TOKEN"</span> -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"meeting_link": "https://meet.google.com/abc-defg-hij", "consent_attested": true}'</span></code></pre>
+<p>The full endpoint list is in the <a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer#-api">README's API section</a>.</p>
+
+<h2>How do you set up your first AI interview?</h2>
+<ol>
+<li><strong>Create a MeetStream API key</strong> and add your voice providers' keys in MeetStream's Integrations.</li>
+<li><strong>Install Recruence</strong> (desktop app or Docker) and finish the setup: database, account, AI provider, MeetStream key.</li>
+<li><strong>Give it a public address:</strong> start a tunnel or point your domain at it, save it as the Public URL, and run the check until it says it reaches this app.</li>
+<li><strong>Set up email</strong> so candidates receive their interview link and the one-time code.</li>
+<li><strong>Create a role,</strong> approve its questions, and set the interview room to your Meet, Zoom or Teams link.</li>
+<li><strong>Interview yourself first.</strong> Apply, open the link, admit the bot, and answer with headphones on.</li>
+<li><strong>Read the server log after the test,</strong> even if it went well. Agent errors, lobby timeouts and quota warnings all show up there.</li>
+</ol>
+<p>The <a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/blob/main/docs/INTERVIEW_SETUP.md">interview setup guide</a> covers each step with screenshots of the settings.</p>
+
+<h2>What to take away about running AI interviews in meetings</h2>
+<p>Getting an AI interviewer into Google Meet, Zoom or Teams is mostly about what surrounds the call: a public address that leads to the right app, voice providers with enough quota for a whole interview, and each platform's joining rules. Get those right, and the interview itself is the easy part.</p>
+<p>If you want to skip the wiring, Recruence's desktop app runs on Windows, macOS and Linux and handles the bot, the links and the checks for you. Start with the <a href="https://github.com/meetstream-ai/Recruence-AI-Interviewer/releases/latest">latest release</a>.</p>
+<p>When something does go wrong, these are the errors we saw most:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Agent stops: 504 Deadline expired</td><td>The conversation model timed out</td><td>Use a model that answers reliably</td></tr>
+<tr><td>Agent stops: 429 Resource exhausted</td><td>Daily quota used up</td><td>A paid tier, or another provider</td></tr>
+<tr><td>Bot waits in the lobby</td><td>Nobody admitted it</td><td>Admit it from the meeting's participant list</td></tr>
+<tr><td>Public URL "isn't this app"</td><td>Tunnel leads elsewhere</td><td>Point the tunnel at Recruence's port</td></tr>
+</tbody></table></div>
+<!--faq-->
